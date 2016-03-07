@@ -29,7 +29,7 @@ func newKube2Consul(kc *kclient.Client, cc *consulapi.Client) *kube2consul {
 	return k2c
 }
 
-// watchForServices start watching for new, removed or updated kubernetes services
+// watchForServices starts watching for new, removed or updated kubernetes services
 func (kc *kube2consul) watchForServices() kcache.Store {
 	serviceStore, serviceController := kframework.NewInformer(
 		kcache.NewListWatchFromClient(kc.kubeClient, "services", kapi.NamespaceAll, kselector.Everything()),

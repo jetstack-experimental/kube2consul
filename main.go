@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"k8s.io/kubernetes/pkg/client/restclient"
 	kclient "k8s.io/kubernetes/pkg/client/unversioned"
 	kclientcmd "k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 
@@ -19,7 +18,6 @@ const (
 var (
 	kubeCfgFile   = flag.String("kube-config", "", "Kubernetes Config File")
 	consulAddress = flag.String("consul-address", "localhost:8500", "Consul Server address")
-	config        *restclient.Config
 )
 
 func main() {
@@ -41,7 +39,7 @@ func main() {
 	select {}
 }
 
-// newKubeClient create a new Kubernetes API Client
+// newKubeClient creates a new Kubernetes API Client
 func newKubeClient(kubeCfgFile string) (*kclient.Client, error) {
 	rules := &kclientcmd.ClientConfigLoadingRules{ExplicitPath: kubeCfgFile}
 	config, err := kclientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &kclientcmd.ConfigOverrides{}).ClientConfig()
@@ -57,7 +55,7 @@ func newKubeClient(kubeCfgFile string) (*kclient.Client, error) {
 	return client, nil
 }
 
-// newConsulClient create a new Consul API Client
+// newConsulClient creates a new Consul API Client
 func newConsulClient(serverAddress string) (*consulapi.Client, error) {
 	config := consulapi.DefaultConfig()
 	config.Address = serverAddress
