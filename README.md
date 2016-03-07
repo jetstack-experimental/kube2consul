@@ -7,4 +7,4 @@ changes in Services and then register those Services in Consul.
 
 `-kube-config`: Path to kubernetes config file.
 
-`consul-address`: The Consul Server address which is used for registering the services.
+`-consul-address`: The Consul Server address which is used for registering the services.
