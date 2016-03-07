@@ -17,7 +17,6 @@ type kube2consul struct {
 	kubeClient    *kclient.Client
 	consulClient  *consulapi.Client
 	consulCatalog *consulapi.Catalog
-	consulAgent   *consulapi.Agent
 }
 
 func newKube2Consul(kc *kclient.Client, cc *consulapi.Client) *kube2consul {
