@@ -53,7 +53,7 @@ func (kc *kube2consul) newService(obj interface{}) {
 			Tags:    []string{"kubernetes"},
 		}
 		if len(s.Spec.Ports) > 0 {
-			service.Port = s.Spec.Ports[0].Port
+			service.Port = int(s.Spec.Ports[0].Port)
 		}
 		reg := &consulapi.CatalogRegistration{
 			Node:    s.Namespace,
