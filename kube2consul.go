@@ -80,10 +80,11 @@ func (kc *kube2consul) removeService(obj interface{}) {
 		log.Printf("Remove Service %+v\n", s.GetName())
 		service := &consulapi.CatalogDeregistration{
 			ServiceID: s.GetName(),
+			Node:      s.Namespace,
 		}
 		_, err := kc.consulCatalog.Deregister(service, &consulapi.WriteOptions{})
 		if err != nil {
-			log.Println("Error registering service:", err)
+			log.Println("Error deregistering service:", err)
 		}
 	}
 }
