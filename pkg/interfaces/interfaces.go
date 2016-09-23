@@ -1,9 +1,7 @@
 package interfaces
 
-import (
-	kapi "k8s.io/kubernetes/pkg/api"
-)
+import ()
 
 type Kube2Consul interface {
-	NodeByPodIP() *kapi.Node
+	NodeIPByPodIP(string) string
 }

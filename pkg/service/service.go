@@ -17,7 +17,7 @@ type Service struct {
 }
 
 func (s *Service) Key() string {
-	return fmt.Sprintf("%s.%s", s.Name, s.Namespace)
+	return fmt.Sprintf("%s.%s", s.Namespace, s.Name)
 }
 
 func (s *Service) Update() error {
@@ -30,9 +30,9 @@ func (s *Service) ListPorts() []interfaces.Endpoint {
 	portCount := len(s.k8sService.Spec.Ports)
 
 	for _, port := range s.k8sService.Spec.Ports {
-		name := s.Key()
+		name := fmt.Sprintf("%s-%s", s.Namespace, s.Name)
 		if portCount > 1 {
-			name = fmt.Sprintf("%s.%s", port.Name, name)
+			name = fmt.Sprintf("%s-%s", name, port.Name)
 		}
 		endpoints = append(endpoints, interfaces.Endpoint{
 			Name: name,
@@ -41,4 +41,23 @@ func (s *Service) ListPorts() []interfaces.Endpoint {
 	}
 
 	return endpoints
+}
+
+func (s *Service) ListAddresses() []string {
+	addresses := make(map[string]bool)
+	for _, subset := range s.k8sEndpoints.Subsets {
+		for _, addr := range subset.Addresses {
+			ip := s.kube2consul.NodeIPByPodIP(addr.IP)
+			addresses[ip] = true
+		}
+	}
+
+	keys := make([]string, len(addresses))
+
+	i := 0
+	for k := range addresses {
+		keys[i] = k
+		i++
+	}
+	return keys
 }
