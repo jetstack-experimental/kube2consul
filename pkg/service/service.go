@@ -47,7 +47,10 @@ func (s *Service) ListAddresses() []string {
 	addresses := make(map[string]bool)
 	for _, subset := range s.k8sEndpoints.Subsets {
 		for _, addr := range subset.Addresses {
-			ip := s.kube2consul.NodeIPByPodIP(addr.IP)
+			ip, err := s.kube2consul.NodeIPByPodIP(addr.IP)
+			if err != nil {
+				continue
+			}
 			addresses[ip] = true
 		}
 	}

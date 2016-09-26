@@ -107,8 +107,8 @@ func TestServiceTwoEndpoints(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockK2C := mocks.NewMockKube2Consul(ctrl)
-	mockK2C.EXPECT().NodeIPByPodIP("1.2.3.4").Return("192.168.0.1")
-	mockK2C.EXPECT().NodeIPByPodIP("4.5.6.7").Return("192.168.0.2")
+	mockK2C.EXPECT().NodeIPByPodIP("1.2.3.4").Return("192.168.0.1", nil)
+	mockK2C.EXPECT().NodeIPByPodIP("4.5.6.7").Return("192.168.0.2", nil)
 
 	s := &Service{
 		Namespace:  "default",
@@ -139,8 +139,8 @@ func TestServiceTwoEndpointsDuplicates(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockK2C := mocks.NewMockKube2Consul(ctrl)
-	mockK2C.EXPECT().NodeIPByPodIP("1.2.3.4").Return("192.168.0.1")
-	mockK2C.EXPECT().NodeIPByPodIP("1.2.3.5").Return("192.168.0.1")
+	mockK2C.EXPECT().NodeIPByPodIP("1.2.3.4").Return("192.168.0.1", nil)
+	mockK2C.EXPECT().NodeIPByPodIP("1.2.3.5").Return("192.168.0.1", nil)
 
 	s := &Service{
 		Namespace:  "default",

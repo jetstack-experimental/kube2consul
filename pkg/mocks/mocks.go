@@ -5,6 +5,8 @@ package mocks
 
 import (
 	gomock "github.com/golang/mock/gomock"
+	release_1_3 "k8s.io/kubernetes/pkg/client/clientset_generated/release_1_3"
+	unversioned "k8s.io/kubernetes/pkg/client/unversioned"
 )
 
 // Mock of Kube2Consul interface
@@ -28,10 +30,31 @@ func (_m *MockKube2Consul) EXPECT() *_MockKube2ConsulRecorder {
 	return _m.recorder
 }
 
-func (_m *MockKube2Consul) NodeIPByPodIP(_param0 string) string {
+func (_m *MockKube2Consul) KubernetesClientset() *release_1_3.Clientset {
+	ret := _m.ctrl.Call(_m, "KubernetesClientset")
+	ret0, _ := ret[0].(*release_1_3.Clientset)
+	return ret0
+}
+
+func (_mr *_MockKube2ConsulRecorder) KubernetesClientset() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "KubernetesClientset")
+}
+
+func (_m *MockKube2Consul) KubernetesClient() *unversioned.Client {
+	ret := _m.ctrl.Call(_m, "KubernetesClient")
+	ret0, _ := ret[0].(*unversioned.Client)
+	return ret0
+}
+
+func (_mr *_MockKube2ConsulRecorder) KubernetesClient() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "KubernetesClient")
+}
+
+func (_m *MockKube2Consul) NodeIPByPodIP(_param0 string) (string, error) {
 	ret := _m.ctrl.Call(_m, "NodeIPByPodIP", _param0)
 	ret0, _ := ret[0].(string)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 func (_mr *_MockKube2ConsulRecorder) NodeIPByPodIP(arg0 interface{}) *gomock.Call {
