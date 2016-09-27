@@ -1,12 +1,13 @@
 package kube2consul
 
 import (
+	"reflect"
+
 	log "github.com/Sirupsen/logrus"
 	kapi "k8s.io/kubernetes/pkg/api"
 	kcache "k8s.io/kubernetes/pkg/client/cache"
 	kframework "k8s.io/kubernetes/pkg/controller/framework"
 	kselector "k8s.io/kubernetes/pkg/fields"
-	"k8s.io/kubernetes/pkg/util/wait"
 )
 
 func (k *Kube2Consul) watchForServices() kcache.Store {
@@ -20,28 +21,36 @@ func (k *Kube2Consul) watchForServices() kcache.Store {
 			UpdateFunc: k.updateService,
 		},
 	)
-	go serviceController.Run(wait.NeverStop)
+	go serviceController.Run(k.stopCh)
 	return serviceStore
 }
 
 func (k *Kube2Consul) newService(obj interface{}) {
 	if s, ok := obj.(*kapi.Service); ok {
-		if s.Spec.Type != kapi.ServiceTypeNodePort {
-			log.Debugf("skip service %s/%s as its not of type NodePort", s.Namespace, s.Name)
-			return
-		}
 		log.Debugf("add service %s/%s", s.Namespace, s.Name)
+		k.registerService(s)
 	}
 }
 
-// removeService deregisters a kubernetes service in Consul
 func (k *Kube2Consul) removeService(obj interface{}) {
 	if s, ok := obj.(*kapi.Service); ok {
 		log.Debugf("remove service %s/%s", s.Namespace, s.Name)
+		k.registerService(nil)
 	}
 }
 
 func (k *Kube2Consul) updateService(oldObj, obj interface{}) {
-	k.removeService(oldObj)
-	k.newService(obj)
+	if s, ok := obj.(*kapi.Service); ok && !reflect.DeepEqual(oldObj, obj) {
+		log.Debugf("update service %s/%s", s.Namespace, s.Name)
+		k.registerService(s)
+	}
+}
+
+func (k *Kube2Consul) registerService(kservice *kapi.Service) {
+	svc := k.getOrCreateService(
+		kservice.Namespace,
+		kservice.Name,
+	)
+	svc.UpdateService(kservice)
+	svc.Update()
 }

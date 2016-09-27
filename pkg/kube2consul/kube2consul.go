@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -17,7 +18,7 @@ import (
 
 	"github.com/simonswine/kube2consul/pkg/detect_node"
 	"github.com/simonswine/kube2consul/pkg/interfaces"
-	//"github.com/simonswine/kube2consul/pkg/services"
+	"github.com/simonswine/kube2consul/pkg/service"
 )
 
 var AppVersion string = "unknown"
@@ -31,13 +32,25 @@ type Kube2Consul struct {
 	Kubeconfig          string
 	detectNode          *detect_node.DetectNode
 	resyncPeriod        time.Duration
+
+	services     map[string]*service.Service
+	servicesLock sync.Mutex
+
+	// stop channel for shutting down
+	stopCh chan struct{}
+
+	// wait group
+	waitGroup sync.WaitGroup
 }
 
 var _ interfaces.Kube2Consul = &Kube2Consul{}
 
 func New() *Kube2Consul {
 	k := &Kube2Consul{
-		resyncPeriod: 30 * time.Minute,
+		resyncPeriod: 5 * time.Minute,
+		stopCh:       make(chan struct{}),
+		waitGroup:    sync.WaitGroup{},
+		services:     make(map[string]*service.Service),
 	}
 	k.init()
 	return k
@@ -158,4 +171,21 @@ func (k *Kube2Consul) KubernetesClientset() *kubernetes.Clientset {
 		k.kubernetesClientset = clientset
 	}
 	return k.kubernetesClientset
+}
+
+func (k *Kube2Consul) getOrCreateService(namespace string, name string) *service.Service {
+	key := fmt.Sprintf("%s/%s", namespace, name)
+
+	k.servicesLock.Lock()
+	defer k.servicesLock.Unlock()
+	if svc, ok := k.services[key]; ok {
+		return svc
+	}
+	svc := service.New(
+		k,
+		namespace,
+		name,
+	)
+	k.services[key] = svc
+	return svc
 }

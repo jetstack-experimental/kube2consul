@@ -1,12 +1,13 @@
 package kube2consul
 
 import (
+	"reflect"
+
 	log "github.com/Sirupsen/logrus"
 	kapi "k8s.io/kubernetes/pkg/api"
 	kcache "k8s.io/kubernetes/pkg/client/cache"
 	kframework "k8s.io/kubernetes/pkg/controller/framework"
 	kselector "k8s.io/kubernetes/pkg/fields"
-	"k8s.io/kubernetes/pkg/util/wait"
 )
 
 func (k *Kube2Consul) watchForEndpointss() kcache.Store {
@@ -20,24 +21,36 @@ func (k *Kube2Consul) watchForEndpointss() kcache.Store {
 			UpdateFunc: k.updateEndpoints,
 		},
 	)
-	go endpointsController.Run(wait.NeverStop)
+	go endpointsController.Run(k.stopCh)
 	return endpointsStore
 }
 
 func (k *Kube2Consul) newEndpoints(obj interface{}) {
 	if s, ok := obj.(*kapi.Endpoints); ok {
 		log.Debugf("add endpoints %s/%s", s.Namespace, s.Name)
+		k.registerEndpoints(s)
 	}
 }
 
-// removeEndpoints deregisters a kubernetes endpoints in Consul
 func (k *Kube2Consul) removeEndpoints(obj interface{}) {
 	if s, ok := obj.(*kapi.Endpoints); ok {
 		log.Debugf("remove endpoints %s/%s", s.Namespace, s.Name)
+		k.registerEndpoints(nil)
 	}
 }
 
 func (k *Kube2Consul) updateEndpoints(oldObj, obj interface{}) {
-	k.removeEndpoints(oldObj)
-	k.newEndpoints(obj)
+	if s, ok := obj.(*kapi.Endpoints); ok && !reflect.DeepEqual(oldObj, obj) {
+		log.Debugf("update endpoints %s/%s", s.Namespace, s.Name)
+		k.registerEndpoints(s)
+	}
+}
+
+func (k *Kube2Consul) registerEndpoints(kendpoints *kapi.Endpoints) {
+	svc := k.getOrCreateService(
+		kendpoints.Namespace,
+		kendpoints.Name,
+	)
+	svc.UpdateEndpoints(kendpoints)
+	svc.Update()
 }
