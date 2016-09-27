@@ -10,14 +10,10 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	kapi "k8s.io/kubernetes/pkg/api"
-	kcache "k8s.io/kubernetes/pkg/client/cache"
 	kubernetes "k8s.io/kubernetes/pkg/client/clientset_generated/release_1_3"
 	krest "k8s.io/kubernetes/pkg/client/restclient"
 	kclient "k8s.io/kubernetes/pkg/client/unversioned"
 	kclientcmd "k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
-	kframework "k8s.io/kubernetes/pkg/controller/framework"
-	kselector "k8s.io/kubernetes/pkg/fields"
-	"k8s.io/kubernetes/pkg/util/wait"
 
 	"github.com/simonswine/kube2consul/pkg/detect_node"
 	"github.com/simonswine/kube2consul/pkg/interfaces"
@@ -41,7 +37,7 @@ var _ interfaces.Kube2Consul = &Kube2Consul{}
 
 func New() *Kube2Consul {
 	k := &Kube2Consul{
-		resyncPeriod: 30 * time.Second,
+		resyncPeriod: 30 * time.Minute,
 	}
 	k.init()
 	return k
@@ -120,6 +116,7 @@ func (k *Kube2Consul) cmdList() {
 
 func (k *Kube2Consul) cmdRun() {
 	k.watchForServices()
+	k.watchForEndpointss()
 	select {}
 }
 
@@ -161,37 +158,4 @@ func (k *Kube2Consul) KubernetesClientset() *kubernetes.Clientset {
 		k.kubernetesClientset = clientset
 	}
 	return k.kubernetesClientset
-}
-
-func (k *Kube2Consul) watchForServices() kcache.Store {
-	serviceStore, serviceController := kframework.NewInformer(
-		kcache.NewListWatchFromClient(k.KubernetesClient(), "services", kapi.NamespaceAll, kselector.Everything()),
-		&kapi.Service{},
-		k.resyncPeriod,
-		kframework.ResourceEventHandlerFuncs{
-			AddFunc:    k.newService,
-			DeleteFunc: k.removeService,
-			UpdateFunc: k.updateService,
-		},
-	)
-	go serviceController.Run(wait.NeverStop)
-	return serviceStore
-}
-
-func (k *Kube2Consul) newService(obj interface{}) {
-	if s, ok := obj.(*kapi.Service); ok {
-		log.Printf("Add Service %+v\n", s.GetName())
-	}
-}
-
-// removeService deregisters a kubernetes service in Consul
-func (k *Kube2Consul) removeService(obj interface{}) {
-	if s, ok := obj.(*kapi.Service); ok {
-		log.Printf("Remove Service %+v\n", s.GetName())
-	}
-}
-
-func (k *Kube2Consul) updateService(oldObj, obj interface{}) {
-	k.removeService(oldObj)
-	k.newService(obj)
 }
