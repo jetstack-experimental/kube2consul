@@ -119,14 +119,33 @@ func (k *Kube2Consul) init() {
 }
 
 func (k *Kube2Consul) cmdList() {
-	svcs, err := k.KubernetesClientset().Core().Services("").List(kapi.ListOptions{})
+	svcs, err := k.KubernetesClient().Services(kapi.NamespaceAll).List(kapi.ListOptions{})
+
 	if err != nil {
-		log.Printf("err: %s", err)
+		log.Warnf("Error getting services: %s", err)
 	}
 
 	for _, svc := range svcs.Items {
 		if kapi.ServiceType(svc.Spec.Type) == kapi.ServiceTypeNodePort {
-			fmt.Printf("%s/%s\n", svc.Namespace, svc.Name)
+			endpoints, err := k.KubernetesClient().Endpoints(svc.Namespace).Get(svc.Name)
+			if err != nil {
+				log.Warnf(
+					"Error getting endpoints for %s/%s: %s",
+					svc.Namespace,
+					svc.Name,
+					err,
+				)
+				continue
+			}
+
+			s := service.New(k, svc.Namespace, svc.Name)
+			s.UpdateService(&svc)
+			s.UpdateEndpoints(endpoints)
+			list := s.List()
+			for _, elem := range list {
+				fmt.Printf("%+v\n", elem)
+			}
+
 		}
 	}
 }
