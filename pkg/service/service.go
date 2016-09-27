@@ -48,7 +48,11 @@ func (s *Service) Update() error {
 	}
 
 	list := s.List()
-	log.Debugf("Endpoints %+v", list)
+	s.kube2consul.UpdateConsul(
+		s.Namespace,
+		s.Name,
+		list,
+	)
 
 	return nil
 }
@@ -89,10 +93,8 @@ func (s *Service) ListPorts() []interfaces.Endpoint {
 			name = fmt.Sprintf("%s-%s", name, port.Name)
 		}
 		endpoints = append(endpoints, interfaces.Endpoint{
-			ServiceName:      s.Name,
-			ServiceNamespace: s.Namespace,
-			DnsLabel:         name,
-			NodePort:         port.NodePort,
+			DnsLabel: name,
+			NodePort: port.NodePort,
 		})
 	}
 

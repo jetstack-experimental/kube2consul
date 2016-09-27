@@ -10,4 +10,5 @@ type Kube2Consul interface {
 	KubernetesClient() *kclient.Client
 	NodeIPByPodIP(string) (string, error)
 	NodeNameByPodIP(string) (string, error)
+	UpdateConsul(namespace string, name string, endpoints []Endpoint) error
 }

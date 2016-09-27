@@ -9,6 +9,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	consulapi "github.com/hashicorp/consul/api"
 	"github.com/spf13/cobra"
 	kapi "k8s.io/kubernetes/pkg/api"
 	kubernetes "k8s.io/kubernetes/pkg/client/clientset_generated/release_1_3"
@@ -30,6 +31,9 @@ type Kube2Consul struct {
 	kubernetesClientset *kubernetes.Clientset
 	kubernetesConfig    *krest.Config
 	Kubeconfig          string
+	consulClient        *consulapi.Client
+	consulCatalog       *consulapi.Catalog
+	consulAddress       string
 	detectNode          *detect_node.DetectNode
 	resyncPeriod        time.Duration
 
@@ -93,6 +97,14 @@ func (k *Kube2Consul) init() {
 		"k",
 		filepath.Join(k.userHomeDir(), ".kube/config"),
 		"path to the kubeconfig file",
+	)
+
+	k.RootCmd.PersistentFlags().StringVarP(
+		&k.consulAddress,
+		"consoul-address",
+		"c",
+		"localhost:8500",
+		"consoul server address",
 	)
 
 	versionCmd := &cobra.Command{
