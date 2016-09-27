@@ -68,9 +68,10 @@ func (s *Service) UpdateService(svc *kapi.Service) error {
 }
 func (s *Service) List() []interfaces.Endpoint {
 	var endpoints []interfaces.Endpoint
-	for _, address := range s.ListAddresses() {
+	for _, node := range s.ListNodes() {
 		for _, port := range s.ListPorts() {
-			port.Address = address
+			port.NodeName = node.NodeName
+			port.NodeAddress = node.NodeAddress
 			endpoints = append(endpoints, port)
 		}
 	}
@@ -88,32 +89,43 @@ func (s *Service) ListPorts() []interfaces.Endpoint {
 			name = fmt.Sprintf("%s-%s", name, port.Name)
 		}
 		endpoints = append(endpoints, interfaces.Endpoint{
-			Name: name,
-			Port: port.NodePort,
+			ServiceName:      s.Name,
+			ServiceNamespace: s.Namespace,
+			DnsLabel:         name,
+			NodePort:         port.NodePort,
 		})
 	}
 
 	return endpoints
 }
 
-func (s *Service) ListAddresses() []string {
-	addresses := make(map[string]bool)
+func (s *Service) ListNodes() []interfaces.Endpoint {
+	nodes := make(map[string]bool)
 	for _, subset := range s.k8sEndpoints.Subsets {
 		for _, addr := range subset.Addresses {
-			ip, err := s.kube2consul.NodeIPByPodIP(addr.IP)
+			name, err := s.kube2consul.NodeNameByPodIP(addr.IP)
 			if err != nil {
+				log.Warnf("Unable to get node of PodIP %s: %s", addr.IP, err)
 				continue
 			}
-			addresses[ip] = true
+			nodes[name] = true
 		}
 	}
 
-	keys := make([]string, len(addresses))
+	objects := make([]interfaces.Endpoint, len(nodes))
 
 	i := 0
-	for k := range addresses {
-		keys[i] = k
+	for nodeName := range nodes {
+		node, err := s.kube2consul.KubernetesClientset().Core().Nodes().Get(nodeName)
+		if err != nil {
+			log.Warnf("Unable to get node %s: %s", nodeName, err)
+			continue
+		}
+		objects[i] = interfaces.Endpoint{
+			NodeName:    nodeName,
+			NodeAddress: node.Status.Addresses[0].Address,
+		}
 		i++
 	}
-	return keys
+	return objects
 }

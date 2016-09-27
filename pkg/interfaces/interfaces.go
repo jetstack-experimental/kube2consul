@@ -9,4 +9,5 @@ type Kube2Consul interface {
 	KubernetesClientset() *kubernetes.Clientset
 	KubernetesClient() *kclient.Client
 	NodeIPByPodIP(string) (string, error)
+	NodeNameByPodIP(string) (string, error)
 }

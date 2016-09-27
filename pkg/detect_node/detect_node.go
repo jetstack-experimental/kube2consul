@@ -20,7 +20,7 @@ func New(k interfaces.Kube2Consul) *DetectNode {
 	}
 }
 
-func (s *DetectNode) nodeNameByPodIP(podIP string) (nodeName string, err error) {
+func (s *DetectNode) NodeNameByPodIP(podIP string) (nodeName string, err error) {
 	pods, err := s.kube2consul.KubernetesClientset().Core().Pods("").List(kapi.ListOptions{})
 	if err != nil {
 		return "", err
@@ -35,7 +35,7 @@ func (s *DetectNode) nodeNameByPodIP(podIP string) (nodeName string, err error) 
 }
 
 func (s *DetectNode) NodeIPByPodIP(podIP string) (nodeIP string, err error) {
-	nodeName, err := s.nodeNameByPodIP(podIP)
+	nodeName, err := s.NodeNameByPodIP(podIP)
 	if err != nil {
 		return "", err
 	}

@@ -1,7 +1,10 @@
 package interfaces
 
 type Endpoint struct {
-	Name    string
-	Address string
-	Port    int32
+	ServiceName      string
+	ServiceNamespace string
+	DnsLabel         string
+	NodeAddress      string
+	NodeName         string
+	NodePort         int32
 }

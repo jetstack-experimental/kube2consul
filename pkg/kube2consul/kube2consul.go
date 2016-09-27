@@ -71,6 +71,10 @@ func (k *Kube2Consul) NodeIPByPodIP(podIP string) (nodeIP string, err error) {
 	return k.detectNode.NodeIPByPodIP(podIP)
 }
 
+func (k *Kube2Consul) NodeNameByPodIP(podIP string) (nodeName string, err error) {
+	return k.detectNode.NodeNameByPodIP(podIP)
+}
+
 func (k *Kube2Consul) init() {
 
 	log.SetOutput(os.Stderr)
