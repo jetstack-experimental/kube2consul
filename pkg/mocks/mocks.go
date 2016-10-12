@@ -60,3 +60,24 @@ func (_m *MockKube2Consul) NodeIPByPodIP(_param0 string) (string, error) {
 func (_mr *_MockKube2ConsulRecorder) NodeIPByPodIP(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "NodeIPByPodIP", arg0)
 }
+
+func (_m *MockKube2Consul) NodeNameByPodIP(_param0 string) (string, error) {
+	ret := _m.ctrl.Call(_m, "NodeNameByPodIP", _param0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockKube2ConsulRecorder) NodeNameByPodIP(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "NodeNameByPodIP", arg0)
+}
+
+func (_m *MockKube2Consul) UpdateConsul(namespace string, name string, endpoints []Endpoint) error {
+	ret := _m.ctrl.Call(_m, "UpdateConsul", namespace, name, endpoints)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockKube2ConsulRecorder) UpdateConsul(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "UpdateConsul", arg0, arg1, arg2)
+}
