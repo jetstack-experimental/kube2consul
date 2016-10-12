@@ -17,9 +17,9 @@ import (
 	kclient "k8s.io/kubernetes/pkg/client/unversioned"
 	kclientcmd "k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 
-	"github.com/simonswine/kube2consul/pkg/detect_node"
-	"github.com/simonswine/kube2consul/pkg/interfaces"
-	"github.com/simonswine/kube2consul/pkg/service"
+	"github.com/jetstack-experimental/kube2consul/pkg/detect_node"
+	"github.com/jetstack-experimental/kube2consul/pkg/interfaces"
+	"github.com/jetstack-experimental/kube2consul/pkg/service"
 )
 
 var AppVersion string = "unknown"

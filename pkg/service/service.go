@@ -7,7 +7,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	kapi "k8s.io/kubernetes/pkg/api"
 
-	"github.com/simonswine/kube2consul/pkg/interfaces"
+	"github.com/jetstack-experimental/kube2consul/pkg/interfaces"
 )
 
 type Service struct {

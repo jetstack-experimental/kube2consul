@@ -7,7 +7,7 @@ import (
 	kapi "k8s.io/kubernetes/pkg/api"
 	kubernetes "k8s.io/kubernetes/pkg/client/clientset_generated/release_1_3"
 
-	"github.com/simonswine/kube2consul/pkg/interfaces"
+	"github.com/jetstack-experimental/kube2consul/pkg/interfaces"
 )
 
 type DetectNode struct {

@@ -6,7 +6,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	consulapi "github.com/hashicorp/consul/api"
 
-	"github.com/simonswine/kube2consul/pkg/interfaces"
+	"github.com/jetstack-experimental/kube2consul/pkg/interfaces"
 )
 
 func (k *Kube2Consul) ConsulClient() *consulapi.Client {

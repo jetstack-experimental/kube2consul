@@ -6,7 +6,7 @@ import (
 	"github.com/golang/mock/gomock"
 	kapi "k8s.io/kubernetes/pkg/api"
 
-	"github.com/simonswine/kube2consul/pkg/mocks"
+	"github.com/jetstack-experimental/kube2consul/pkg/mocks"
 )
 
 func TestServiceOnePort(t *testing.T) {
