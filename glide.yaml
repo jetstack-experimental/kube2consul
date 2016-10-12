@@ -1,11 +1,17 @@
-package: github.com/simonswine/kube2consul
+package: github.com/jetstack-experimental/kube2consul
 import:
 - package: github.com/Sirupsen/logrus
+  version: ^0.10.0
 - package: github.com/golang/mock
   subpackages:
   - gomock
+- package: github.com/hashicorp/consul
+  version: ^0.7.0
+  subpackages:
+  - api
 - package: github.com/spf13/cobra
 - package: k8s.io/kubernetes
+  version: ^1.5.0-alpha.0
   subpackages:
   - pkg/api
   - pkg/client/cache
@@ -15,4 +21,3 @@ import:
   - pkg/client/unversioned/clientcmd
   - pkg/controller/framework
   - pkg/fields
-  - pkg/util/wait
